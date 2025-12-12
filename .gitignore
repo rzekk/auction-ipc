@@ -1,0 +1,10 @@
+build-*/
+*.o
+*.obj
+*.exe
+*.dll
+*.so
+*.pro.user
+Makefile
+debug/
+release/
