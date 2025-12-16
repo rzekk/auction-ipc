@@ -196,7 +196,7 @@ QSpinBox::up-button:hover, QSpinBox::down-button:hover {
 </string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QWidget" name="">
+   <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -231,7 +231,21 @@ QSpinBox::up-button:hover, QSpinBox::down-button:hover {
             </layout>
            </item>
            <item>
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Lots</string>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QListWidget" name="lotsListWidget"/>
+           </item>
+           <item>
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Clients</string>
+             </property>
+            </widget>
            </item>
            <item>
             <widget class="QListWidget" name="clientsListWidget"/>
@@ -248,14 +262,46 @@ QSpinBox::up-button:hover, QSpinBox::down-button:hover {
         </layout>
        </item>
        <item>
-        <widget class="QLineEdit" name="currentLot"/>
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <item>
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Current Lot</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="currentLot"/>
+         </item>
+        </layout>
        </item>
       </layout>
      </item>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_3">
        <item>
-        <widget class="QLineEdit" name="clientName"/>
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Leader</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="clientName">
+         <property name="minimumSize">
+          <size>
+           <width>186</width>
+           <height>0</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>Max bet</string>
+         </property>
+        </widget>
        </item>
        <item>
         <widget class="QLineEdit" name="currentBet"/>
@@ -263,7 +309,18 @@ QSpinBox::up-button:hover, QSpinBox::down-button:hover {
       </layout>
      </item>
      <item>
-      <widget class="QLineEdit" name="timer"/>
+      <layout class="QHBoxLayout" name="horizontalLayout_7">
+       <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Timer</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLineEdit" name="timer"/>
+       </item>
+      </layout>
      </item>
      <item>
       <widget class="QPushButton" name="startButton">
