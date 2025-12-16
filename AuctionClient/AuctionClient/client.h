@@ -5,6 +5,7 @@
 #include <winsock2.h>
 #include <thread>
 #include <string>
+#include <QLineEdit>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Client; }
@@ -19,16 +20,14 @@ public:
     ~Client();
 
 signals:
-    // Сигнал, щоб передати текст з фонового потоку в GUI
     void messageReceived(QString msg);
+    void timerUpdated(QString timeStr);
 
 private slots:
-    // Слоти кнопок
     void on_connectButton_clicked();
     void on_bidButton_clicked();
-
-    // Слот для оновлення тексту на екрані
     void updateLog(QString msg);
+    void updateTimerDisplay(QString timeStr);
 
 private:
     Ui::Client *ui;
@@ -37,10 +36,7 @@ private:
     bool isConnected = false;
     std::thread *receiverThread = nullptr;
 
-    // Основна функція підключення
-    bool connectToServer(QString ip, int port);
-
-    // Функція, яка буде крутитися в окремому потоці
+    bool connectToServer(QString ip, int port, QString username);
     void receiveLoop();
 };
 
