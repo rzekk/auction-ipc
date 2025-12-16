@@ -20,14 +20,24 @@ public:
     ~Client();
 
 signals:
+    // Сигнали для передачі даних з потоку в GUI
     void messageReceived(QString msg);
     void timerUpdated(QString timeStr);
+    void updateLotInfo(QString lotName, QString startPrice);
+    void updateBidInfo(QString newPrice);
 
 private slots:
     void on_connectButton_clicked();
-    void on_bidButton_clicked();
+
+    // ВАЖЛИВО: Назва має бути exactly on_betButton_clicked, бо кнопка в UI називається betButton
+    void on_betButton_clicked();
+
     void updateLog(QString msg);
     void updateTimerDisplay(QString timeStr);
+
+    // Слоти для оновлення полів аукціону
+    void onUpdateLot(QString lotName, QString startPrice);
+    void onUpdateBid(QString newPrice);
 
 private:
     Ui::Client *ui;
