@@ -15,33 +15,26 @@ Server::Server(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // Основні сигнали
     connect(this, &Server::logToGui, this, &Server::onLogReceived);
     connect(this, &Server::updateHighestBid, this, &Server::onUpdateBidReceived);
 
-    // Сигнали списку клієнтів
     connect(this, &Server::addClientToGui, this, &Server::onAddClient);
     connect(this, &Server::removeClientFromGui, this, &Server::onRemoveClient);
 
-    // Таймер
     connect(this, &Server::updateTimerGui, ui->timer, &QLineEdit::setText);
     gameTimer = new QTimer(this);
     connect(gameTimer, &QTimer::timeout, this, &Server::onTimerTick);
 
-    // === НАЛАШТУВАННЯ ІНТЕРФЕЙСУ (READ ONLY) ===
-    // Забороняємо змінювати інформаційні поля вручну
     ui->currentLot->setReadOnly(true);
     ui->currentBet->setReadOnly(true);
     ui->clientName->setReadOnly(true);
     ui->timer->setReadOnly(true);
     ui->logTextEdit->setReadOnly(true);
 
-    // Вирівнювання тексту для краси
     ui->timer->setAlignment(Qt::AlignCenter);
     ui->currentBet->setAlignment(Qt::AlignCenter);
     ui->clientName->setAlignment(Qt::AlignCenter);
 
-    // Запускаємо сервер
     std::thread(&Server::startServerThread, this).detach();
 }
 
@@ -59,7 +52,6 @@ Server::~Server()
     delete ui;
 }
 
-// === УПРАВЛІННЯ СПИСКОМ КЛІЄНТІВ (GUI) ===
 
 void Server::onAddClient(int id, QString name) {
     QString itemText = name + " (ID: " + QString::number(id) + ")";
@@ -78,7 +70,6 @@ void Server::onRemoveClient(int id) {
     }
 }
 
-// === ДОПОМІЖНІ ===
 
 QString Server::getClientName(int id) {
     std::lock_guard<std::mutex> lock(clients_mutex);
@@ -95,7 +86,6 @@ void Server::setUIControlsEnabled(bool enabled) {
     ui->lotsListWidget->setEnabled(enabled);
 }
 
-// === СЛОТИ GUI ===
 
 void Server::on_startButton_clicked() {
     if (currentLotIndex == -1) {
@@ -120,7 +110,6 @@ void Server::onUpdateBidReceived(int clientId, int amount) {
     ui->clientName->setText(getClientName(clientId));
 }
 
-// === РОБОТА З ЛОТАМИ ===
 
 void Server::on_createLotButton_clicked() {
     QDialog dialog(this);
@@ -173,8 +162,6 @@ void Server::on_deleteLotButton_clicked() {
     emit logToGui("Лот видалено.");
 }
 
-// === ТАЙМЕР ===
-
 void Server::onTimerTick() {
     remainingTime--;
     emit updateTimerGui(QString::number(remainingTime));
@@ -205,7 +192,6 @@ void Server::onTimerTick() {
     }
 }
 
-// === МЕРЕЖА ===
 
 void Server::startServerThread() {
     WSADATA wsaData;
@@ -313,14 +299,12 @@ void Server::auctionLogicLoop() {
             max_bid = msg.amount;
             winner_id = msg.client_id;
 
-            // === ПОВЕРТАЄМО ТАЙМЕР НА 60 СЕК ПРИ НОВІЙ СТАВЦІ ===
             if (remainingTime > 0) {
                 remainingTime = 60;
                 emit updateTimerGui("60");
                 broadcastMessage("TIMER:60");
                 emit logToGui("Час продовжено до 60с через нову ставку.");
             }
-            // ====================================================
 
             emit updateHighestBid(winner_id, max_bid);
 

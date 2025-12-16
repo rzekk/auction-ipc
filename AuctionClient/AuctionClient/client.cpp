@@ -8,30 +8,24 @@ Client::Client(QWidget *parent) : QMainWindow(parent), ui(new Ui::Client)
 {
     ui->setupUi(this);
 
-    // Підключення сигналів
     connect(this, &Client::messageReceived, this, &Client::updateLog);
     connect(this, &Client::timerUpdated, this, &Client::updateTimerDisplay);
     connect(this, &Client::updateLotInfo, this, &Client::onUpdateLot);
     connect(this, &Client::updateBidInfo, this, &Client::onUpdateBid);
 
-    // Налаштування спінбокса (ставок)
     ui->betSpinBox->setRange(0, 1000000);
     ui->betSpinBox->setSingleStep(10);
 
-    // === БЛОКУВАННЯ ПОЛІВ (READ ONLY) ===
-    // Користувач не повинен писати сюди вручну, ці дані приходять з сервера
     ui->currentLot->setReadOnly(true);
     ui->maxBet->setReadOnly(true);
     ui->yourBet->setReadOnly(true);
     ui->timer->setReadOnly(true);
     ui->logTextEdit->setReadOnly(true);
 
-    // Додатково: Вирівнювання тексту по центру для краси
     ui->timer->setAlignment(Qt::AlignCenter);
     ui->maxBet->setAlignment(Qt::AlignCenter);
     ui->yourBet->setAlignment(Qt::AlignCenter);
 
-    // За замовчуванням аукціон не активний
     auctionActive = false;
 }
 
@@ -50,14 +44,11 @@ Client::~Client()
     delete ui;
 }
 
-// === ОНОВЛЕННЯ ІНТЕРФЕЙСУ ===
-
 void Client::onUpdateLot(QString lotName, QString startPrice) {
     ui->currentLot->setText(lotName);
     ui->maxBet->setText(startPrice);
     ui->yourBet->clear();
 
-    // Дозволяємо ставки
     auctionActive = true;
 
     updateLog("Увага! Новий лот: " + lotName);
@@ -78,7 +69,6 @@ void Client::updateTimerDisplay(QString timeStr) {
     }
 }
 
-// === МЕРЕЖА ===
 
 void Client::on_connectButton_clicked()
 {
@@ -92,7 +82,6 @@ void Client::on_connectButton_clicked()
     }
 
     if (connectToServer(ip, port, username)) {
-        // Блокуємо поля вводу підключення, щоб не можна було змінити під час роботи
         ui->connectButton->setEnabled(false);
         ui->ipLineEdit->setEnabled(false);
         ui->portLineEdit->setEnabled(false);
@@ -183,7 +172,6 @@ void Client::receiveLoop() {
     }
 }
 
-// === КНОПКА СТАВКИ ===
 
 void Client::on_betButton_clicked()
 {
