@@ -8,6 +8,9 @@
 #include <queue>
 #include <mutex>
 #include <condition_variable>
+#include <QTimer>
+#include <QListWidgetItem>
+#include <map>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class Server; }
@@ -18,6 +21,11 @@ struct BidMessage {
     int amount;
 };
 
+struct Lot {
+    QString name;
+    int startPrice;
+};
+
 class Server : public QMainWindow
 {
     Q_OBJECT
@@ -26,40 +34,60 @@ public:
     Server(QWidget *parent = nullptr);
     ~Server();
 
-    // Функція запуску сервера (викличемо її по кнопці Старт)
-    void startServer();
-
 signals:
-    // Сигнали, щоб оновлювати GUI з інших потоків
     void logToGui(QString message);
     void updateHighestBid(int clientId, int amount);
+    void updateTimerGui(QString timeStr);
+
+    // Нові сигнали для списку клієнтів
+    void addClientToGui(int id, QString name);
+    void removeClientFromGui(int id);
 
 private slots:
-    // Слоти, які приймають сигнали і малюють на екрані
     void onLogReceived(QString message);
     void onUpdateBidReceived(int clientId, int amount);
-    void on_startButton_clicked(); // Слот для кнопки у .ui файлі
+    void on_startButton_clicked();
+    void onTimerTick();
+
+    // Слоти лотів
+    void on_createLotButton_clicked();
+    void on_deleteLotButton_clicked();
+    void on_lotsListWidget_itemClicked(QListWidgetItem *item);
+
+    // Нові слоти для списку клієнтів
+    void onAddClient(int id, QString name);
+    void onRemoveClient(int id);
 
 private:
     Ui::Server *ui;
 
-    // Мережеві змінні
     SOCKET server_fd;
     bool isRunning = false;
+    std::vector<SOCKET> connected_clients;
+    std::mutex clients_mutex;
 
-    // Змінні аукціону
-    int max_bid = 0;
-    int winner_id = -1;
+    // Карта імен: ID -> Name
+    std::map<int, QString> client_names;
 
-    // Синхронізація
+    // Аукціон
     std::queue<BidMessage> bid_queue;
     std::mutex queue_mutex;
     std::condition_variable queue_cv;
+    int max_bid = 0;
+    int winner_id = -1;
 
-    // Потокові функції (тепер це методи класу)
-    void serverAcceptLoop();      // Цикл прийому нових клієнтів
-    void clientHandler(SOCKET clientSocket, int clientId); // Обробка клієнта
-    void auctionLogicLoop();      // Логіка визначення переможця
+    QTimer *gameTimer;
+    int remainingTime;
+
+    std::vector<Lot> lots;
+    int currentLotIndex = -1;
+
+    void startServerThread(); // Метод для запуску потоку
+    void clientHandler(SOCKET client_socket, int client_id);
+    void auctionLogicLoop();
+    void broadcastMessage(const std::string &msg);
+    void setUIControlsEnabled(bool enabled);
+    QString getClientName(int id);
 };
 
 #endif // SERVER_H

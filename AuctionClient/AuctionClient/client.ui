@@ -9,117 +9,343 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>872</width>
-    <height>600</height>
+    <width>505</width>
+    <height>634</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Client</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QLineEdit" name="ipLineEdit">
+   <property name="styleSheet">
+    <string notr="true">QMainWindow,
+QDialog{
+	background-color: qlineargradient(spread:pad, x1:0, y1:0, x2:1, y2:1, stop:0.177033 #092029, stop:1 #031921);
+}
+
+QObject{
+	font: 10pt &quot;Source Code Pro&quot;;
+	color: #FFF;
+}
+
+QPushButton{
+	padding: 5px;
+	background-color: #E9C46A;
+	color: #264653;
+	font-weight: 700;
+	border-radius: 10px;
+}
+QPushButton:hover{
+	background-color: #F4A261;
+}
+QPushButton:pressed{
+	background-color: #E76F51 ;
+}
+
+QCheckBox::indicator {
+    width:  12px;
+    height: 12px;
+	border: 4px solid #E9C46A;
+    border-radius: 10px;
+    background-color: #E9C46A;
+}
+
+QCheckBox::indicator:hover {
+    border-color: #F4A261;
+}
+
+QCheckBox::indicator:checked {
+    background-color: #E76F51;
+}
+
+QCheckBox{    
+    padding: 5px;
+    background-color: #264653;
+    border-radius: 10px;
+}
+
+QTextEdit,
+QPlainTextEdit,
+QLineEdit,
+QGraphicsView,
+QScrollArea{
+	background-color: #264653;
+	border: none;
+	padding: 7px;
+	border-radius: 12px;
+}
+
+QListWidget {
+    background-color: #264653; 
+    border: 2px solid #415A77; 
+	border-radius: 15px;
+    padding: 10px;
+	font-size: 10pt;
+    outline: none;
+}
+
+QListWidget::item {
+    padding: 5px;         
+    margin: 3px 0;
+	margin-right: 5px;
+    background-color: #2A9D8F;
+    border-radius: 10px;      
+	border: 1px solid #415A77;
+	outline: none;
+}
+
+QListWidget::item:hover {
+    background-color: #E9C46A; 
+    color: #fff;
+}
+
+QListWidget::item:selected {
+    background-color: #F4A261;
+    color: #fff;               
+}
+
+QScrollBar:vertical,
+QScrollBar:horizontal {
+	width: 12px; 
+	background: transparent; 
+	margin: 0px; 
+}
+
+QScrollBar::handle:vertical,
+QScrollBar::handle:horizontal {
+	background: #E9C46A; 
+	min-height: 20px; 
+	border-radius: 6px;
+}
+
+QScrollBar::handle:vertical:hover,
+QScrollBar::handle:vertical:pressed,
+QScrollBar::handle:horizontal:hover,
+QScrollBar::handle:horizontal:pressed {
+    background: #F4A261;
+}
+
+QScrollBar:vertical,
+QScrollBar:horizontal {
+    background: transparent;
+    margin: 0px;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical,
+QScrollBar::add-page:horizontal,
+QScrollBar::sub-page:horizontal {
+    background: transparent;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical,
+QScrollBar::add-line:horizontal,
+QScrollBar::sub-line:horizontal {
+    height: 0px;
+    width: 0px;   
+}
+
+QComboBox {
+    border-radius: 8px;
+    padding: 5px 8px;
+    background-color: #264653;
+    color: #fff;
+}
+
+QComboBox::drop-down {
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    background-color: #E9C46A;
+}
+
+QComboBox QAbstractItemView {
+    background-color: #264653;
+    color: #fff;
+    border-radius: 5px;
+}
+
+
+QSpinBox{
+    color: #fff;
+    background-color: #264653;
+    border-radius: 10px;
+    padding: 5px;
+    height: 20px;
+}
+
+QSpinBox::up-button {
+    width: 10px;
+    height: 20px;
+    padding: 5px 2px;
+    background-color: #E9C46A;
+    subcontrol-position: center right;
+    border-bottom-right-radius: 10px;
+    border-top-right-radius: 10px;
+}
+
+QSpinBox::down-button {
+    width: 10px;
+    height: 20px;
+    padding: 5px 2px;
+    background-color: #E9C46A;
+    subcontrol-position: center left;
+    border-bottom-left-radius: 10px;
+    border-top-left-radius: 10px;
+}
+
+QSpinBox::up-button:hover, QSpinBox::down-button:hover {
+    background-color: #F4A261;
+}
+</string>
+   </property>
+   <widget class="QWidget" name="">
     <property name="geometry">
      <rect>
-      <x>330</x>
-      <y>30</y>
-      <width>113</width>
-      <height>28</height>
+      <x>10</x>
+      <y>10</y>
+      <width>479</width>
+      <height>561</height>
      </rect>
     </property>
-    <property name="text">
-     <string>127.0.0.1</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="portLineEdit">
-    <property name="geometry">
-     <rect>
-      <x>330</x>
-      <y>70</y>
-      <width>113</width>
-      <height>28</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>8080</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>450</x>
-      <y>33</y>
-      <width>63</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>IP</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>452</x>
-      <y>72</y>
-      <width>63</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Port</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="connectButton">
-    <property name="geometry">
-     <rect>
-      <x>340</x>
-      <y>120</y>
-      <width>90</width>
-      <height>29</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Connect</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="bidButton">
-    <property name="geometry">
-     <rect>
-      <x>250</x>
-      <y>370</y>
-      <width>271</width>
-      <height>91</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>BID</string>
-    </property>
-   </widget>
-   <widget class="QTextEdit" name="logTextEdit">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>590</x>
-      <y>30</y>
-      <width>241</width>
-      <height>451</height>
-     </rect>
-    </property>
-    <property name="readOnly">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QSpinBox" name="bidSpinBox">
-    <property name="geometry">
-     <rect>
-      <x>250</x>
-      <y>280</y>
-      <width>271</width>
-      <height>71</height>
-     </rect>
-    </property>
+    <layout class="QVBoxLayout" name="verticalLayout_8">
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_7">
+       <item>
+        <layout class="QVBoxLayout" name="verticalLayout_6">
+         <item>
+          <layout class="QVBoxLayout" name="verticalLayout_5">
+           <item>
+            <layout class="QVBoxLayout" name="verticalLayout_4">
+             <item>
+              <layout class="QVBoxLayout" name="verticalLayout_3">
+               <item>
+                <layout class="QVBoxLayout" name="verticalLayout_2">
+                 <item>
+                  <layout class="QVBoxLayout" name="verticalLayout">
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_4">
+                     <item>
+                      <widget class="QLabel" name="userNameLabel">
+                       <property name="text">
+                        <string>Username:</string>
+                       </property>
+                      </widget>
+                     </item>
+                     <item>
+                      <widget class="QLineEdit" name="usernameLineEdit"/>
+                     </item>
+                    </layout>
+                   </item>
+                   <item>
+                    <layout class="QHBoxLayout" name="horizontalLayout_3">
+                     <item>
+                      <layout class="QHBoxLayout" name="horizontalLayout_2">
+                       <item>
+                        <widget class="QLineEdit" name="ipLineEdit">
+                         <property name="text">
+                          <string>127.0.0.1</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QLabel" name="ipLabel">
+                         <property name="text">
+                          <string>IP</string>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </item>
+                     <item>
+                      <layout class="QHBoxLayout" name="horizontalLayout">
+                       <item>
+                        <widget class="QLineEdit" name="portLineEdit">
+                         <property name="text">
+                          <string>8080</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QLabel" name="portLabel">
+                         <property name="text">
+                          <string>Port</string>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </item>
+                    </layout>
+                   </item>
+                  </layout>
+                 </item>
+                 <item>
+                  <widget class="QPushButton" name="connectButton">
+                   <property name="text">
+                    <string>Connect</string>
+                   </property>
+                  </widget>
+                 </item>
+                </layout>
+               </item>
+               <item>
+                <widget class="QTextEdit" name="logTextEdit">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
+                 <property name="readOnly">
+                  <bool>true</bool>
+                 </property>
+                </widget>
+               </item>
+              </layout>
+             </item>
+             <item>
+              <layout class="QHBoxLayout" name="horizontalLayout_5">
+               <item>
+                <widget class="QLineEdit" name="currentLot"/>
+               </item>
+               <item>
+                <widget class="QLineEdit" name="maxBet"/>
+               </item>
+              </layout>
+             </item>
+            </layout>
+           </item>
+           <item>
+            <layout class="QHBoxLayout" name="horizontalLayout_6">
+             <item>
+              <widget class="QLabel" name="label">
+               <property name="text">
+                <string>Your bet</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QLineEdit" name="yourBet"/>
+             </item>
+            </layout>
+           </item>
+          </layout>
+         </item>
+         <item>
+          <widget class="QLineEdit" name="timer"/>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <widget class="QSpinBox" name="betSpinBox"/>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <widget class="QPushButton" name="betButton">
+       <property name="text">
+        <string>Bet</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -127,10 +353,16 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>872</width>
+     <width>505</width>
      <height>25</height>
     </rect>
    </property>
+   <widget class="QMenu" name="menucleint">
+    <property name="title">
+     <string> </string>
+    </property>
+   </widget>
+   <addaction name="menucleint"/>
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
