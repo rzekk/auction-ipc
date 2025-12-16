@@ -24,7 +24,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>START BLYAT</string>
+     <string>START</string>
     </property>
    </widget>
    <widget class="QTextEdit" name="logTextEdit">
@@ -35,6 +35,9 @@
       <width>241</width>
       <height>301</height>
      </rect>
+    </property>
+    <property name="readOnly">
+     <bool>true</bool>
     </property>
    </widget>
    <widget class="QLabel" name="bidLabel">

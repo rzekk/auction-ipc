@@ -2,6 +2,9 @@
 #include "ui_server.h"
 #include <string>
 
+
+// TODO: WRITE UI
+
 Server::Server(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::Server)
@@ -17,18 +20,16 @@ Server::~Server()
     isRunning = false;
     closesocket(server_fd);
     WSACleanup();
-    // Тут в ідеалі треба джойнити потоки, але для прикладу пропустимо
     delete ui;
 }
 
-// === GUI СЛОТИ (Працюють в головному потоці) ===
+
 void Server::on_startButton_clicked() {
-    ui->startButton->setEnabled(false); // Щоб не натиснули двічі
+    ui->startButton->setEnabled(false);
     startServer();
 }
 
 void Server::onLogReceived(QString message) {
-    // Припускаємо, що у вас є textEdit або listWidget для логів
     ui->logTextEdit->append(message);
 }
 
@@ -37,7 +38,7 @@ void Server::onUpdateBidReceived(int clientId, int amount) {
     ui->winnerLabel->setText("Клієнт ID: " + QString::number(clientId));
 }
 
-// === ЛОГІКА СЕРВЕРА ===
+
 
 void Server::startServer() {
     WSADATA wsaData;
@@ -55,11 +56,9 @@ void Server::startServer() {
     isRunning = true;
     emit logToGui("Сервер запущено на порті 8080...");
 
-    // Запускаємо потік аукціону
     std::thread logicThread(&Server::auctionLogicLoop, this);
     logicThread.detach();
 
-    // Запускаємо потік прослуховування нових підключень
     std::thread acceptThread(&Server::serverAcceptLoop, this);
     acceptThread.detach();
 }
@@ -73,7 +72,6 @@ void Server::serverAcceptLoop() {
         client_count++;
         emit logToGui("Новий клієнт підключився! ID: " + QString::number(client_count));
 
-        // Створюємо потік для клієнта
         std::thread t(&Server::clientHandler, this, new_socket, client_count);
         t.detach();
     }
@@ -90,7 +88,6 @@ void Server::clientHandler(SOCKET client_socket, int client_id) {
             return;
         }
 
-        // Блокуємо м'ютекс і додаємо в чергу
         {
             std::lock_guard<std::mutex> lock(queue_mutex);
             bid_queue.push({client_id, bid_amount});
@@ -108,7 +105,6 @@ void Server::auctionLogicLoop() {
         BidMessage msg;
         {
             std::unique_lock<std::mutex> lock(queue_mutex);
-            // Чекаємо, поки в черзі щось з'явиться
             queue_cv.wait(lock, [this] { return !bid_queue.empty(); });
 
             msg = bid_queue.front();
@@ -119,12 +115,10 @@ void Server::auctionLogicLoop() {
             max_bid = msg.amount;
             winner_id = msg.client_id;
 
-            // Оновлюємо GUI через сигнал
             emit logToGui("!!! Новий лідер: ID " + QString::number(winner_id) + " (" + QString::number(max_bid) + ")");
             emit updateHighestBid(winner_id, max_bid);
 
-            // ТУТ ВАЖЛИВО: Треба надіслати відповідь клієнтам назад через send()
-            // Але у вашому коді поки що тільки прийом.
+            // TODO: send signal to client once it's done
         } else {
             emit logToGui("Ставка " + QString::number(msg.amount) + " замала.");
         }
