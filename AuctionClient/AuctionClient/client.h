@@ -20,7 +20,6 @@ public:
     ~Client();
 
 signals:
-    // Сигнали для передачі даних з потоку в GUI
     void messageReceived(QString msg);
     void timerUpdated(QString timeStr);
     void updateLotInfo(QString lotName, QString startPrice);
@@ -28,14 +27,11 @@ signals:
 
 private slots:
     void on_connectButton_clicked();
-
-    // ВАЖЛИВО: Назва має бути exactly on_betButton_clicked, бо кнопка в UI називається betButton
-    void on_betButton_clicked();
+    void on_betButton_clicked(); // Кнопка ставки
 
     void updateLog(QString msg);
     void updateTimerDisplay(QString timeStr);
 
-    // Слоти для оновлення полів аукціону
     void onUpdateLot(QString lotName, QString startPrice);
     void onUpdateBid(QString newPrice);
 
@@ -44,6 +40,10 @@ private:
 
     SOCKET client_socket;
     bool isConnected = false;
+
+    // === НОВА ЗМІННА ===
+    bool auctionActive = false; // Чи йде зараз активний торг?
+
     std::thread *receiverThread = nullptr;
 
     bool connectToServer(QString ip, int port, QString username);
