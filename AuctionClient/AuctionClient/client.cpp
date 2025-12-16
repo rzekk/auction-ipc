@@ -7,8 +7,32 @@
 Client::Client(QWidget *parent) : QMainWindow(parent), ui(new Ui::Client)
 {
     ui->setupUi(this);
+
+    // Підключення сигналів
     connect(this, &Client::messageReceived, this, &Client::updateLog);
     connect(this, &Client::timerUpdated, this, &Client::updateTimerDisplay);
+    connect(this, &Client::updateLotInfo, this, &Client::onUpdateLot);
+    connect(this, &Client::updateBidInfo, this, &Client::onUpdateBid);
+
+    // Налаштування спінбокса (ставок)
+    ui->betSpinBox->setRange(0, 1000000);
+    ui->betSpinBox->setSingleStep(10);
+
+    // === БЛОКУВАННЯ ПОЛІВ (READ ONLY) ===
+    // Користувач не повинен писати сюди вручну, ці дані приходять з сервера
+    ui->currentLot->setReadOnly(true);
+    ui->maxBet->setReadOnly(true);
+    ui->yourBet->setReadOnly(true);
+    ui->timer->setReadOnly(true);
+    ui->logTextEdit->setReadOnly(true);
+
+    // Додатково: Вирівнювання тексту по центру для краси
+    ui->timer->setAlignment(Qt::AlignCenter);
+    ui->maxBet->setAlignment(Qt::AlignCenter);
+    ui->yourBet->setAlignment(Qt::AlignCenter);
+
+    // За замовчуванням аукціон не активний
+    auctionActive = false;
 }
 
 Client::~Client()
@@ -26,6 +50,36 @@ Client::~Client()
     delete ui;
 }
 
+// === ОНОВЛЕННЯ ІНТЕРФЕЙСУ ===
+
+void Client::onUpdateLot(QString lotName, QString startPrice) {
+    ui->currentLot->setText(lotName);
+    ui->maxBet->setText(startPrice);
+    ui->yourBet->clear();
+
+    // Дозволяємо ставки
+    auctionActive = true;
+
+    updateLog("Увага! Новий лот: " + lotName);
+}
+
+void Client::onUpdateBid(QString newPrice) {
+    ui->maxBet->setText(newPrice);
+}
+
+void Client::updateLog(QString msg) {
+    ui->logTextEdit->append(msg);
+}
+
+void Client::updateTimerDisplay(QString timeStr) {
+    QLineEdit *timerWidget = this->findChild<QLineEdit*>("timer");
+    if (timerWidget) {
+        timerWidget->setText(timeStr);
+    }
+}
+
+// === МЕРЕЖА ===
+
 void Client::on_connectButton_clicked()
 {
     QString ip = ui->ipLineEdit->text();
@@ -38,10 +92,12 @@ void Client::on_connectButton_clicked()
     }
 
     if (connectToServer(ip, port, username)) {
+        // Блокуємо поля вводу підключення, щоб не можна було змінити під час роботи
         ui->connectButton->setEnabled(false);
         ui->ipLineEdit->setEnabled(false);
         ui->portLineEdit->setEnabled(false);
         ui->usernameLineEdit->setEnabled(false);
+
         ui->logTextEdit->append("Підключено до сервера як " + username);
     } else {
         ui->logTextEdit->append("Не вдалося підключитися.");
@@ -93,6 +149,7 @@ void Client::receiveLoop() {
             if (msg.startsWith("TIMER:")) {
                 QString timeStr = msg.mid(6);
                 if (timeStr == "END") {
+                    auctionActive = false;
                     emit messageReceived("Аукціон закінчився!");
                     emit timerUpdated("0");
                 } else {
@@ -100,15 +157,18 @@ void Client::receiveLoop() {
                 }
             }
             else if (msg.startsWith("STOP:")) {
+                auctionActive = false;
                 emit messageReceived(msg.mid(5));
             }
             else if (msg.startsWith("BID:")) {
-                emit messageReceived("Нова максимальна ставка: " + msg.mid(4));
+                QString price = msg.mid(4);
+                emit updateBidInfo(price);
+                emit messageReceived("Нова ставка: " + price);
             }
             else if (msg.startsWith("LOT:")) {
                 QStringList parts = msg.split(":");
                 if (parts.size() >= 3) {
-                    emit messageReceived("Новий лот: " + parts[1] + " (Старт: " + parts[2] + ")");
+                    emit updateLotInfo(parts[1], parts[2]);
                 }
             }
             else {
@@ -123,26 +183,35 @@ void Client::receiveLoop() {
     }
 }
 
-void Client::on_bidButton_clicked()
+// === КНОПКА СТАВКИ ===
+
+void Client::on_betButton_clicked()
 {
-    if (!isConnected) return;
+    if (!isConnected) {
+        QMessageBox::warning(this, "Помилка", "Спочатку підключіться до сервера!");
+        return;
+    }
+
+    if (!auctionActive) {
+        QMessageBox::warning(this, "Увага", "На даний момент немає активного лоту для ставок!");
+        return;
+    }
+
     int amount = ui->betSpinBox->value();
+
+    int currentMax = ui->maxBet->text().toInt();
+    if (amount <= currentMax) {
+        QMessageBox::warning(this, "Увага", "Ваша ставка має бути вищою за поточну (" + QString::number(currentMax) + ")!");
+        return;
+    }
+
+    ui->yourBet->setText(QString::number(amount));
+
     int sendResult = send(client_socket, (char*)&amount, sizeof(int), 0);
 
     if (sendResult == SOCKET_ERROR) {
         ui->logTextEdit->append("Помилка відправки ставки!");
     } else {
         ui->logTextEdit->append("Ви зробили ставку: " + QString::number(amount));
-    }
-}
-
-void Client::updateLog(QString msg) {
-    ui->logTextEdit->append(msg);
-}
-
-void Client::updateTimerDisplay(QString timeStr) {
-    QLineEdit *timerWidget = this->findChild<QLineEdit*>("timer");
-    if (timerWidget) {
-        timerWidget->setText(timeStr);
     }
 }

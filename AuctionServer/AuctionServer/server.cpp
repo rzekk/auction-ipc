@@ -28,9 +28,20 @@ Server::Server(QWidget *parent)
     gameTimer = new QTimer(this);
     connect(gameTimer, &QTimer::timeout, this, &Server::onTimerTick);
 
-    // Запускаємо сервер автоматично при старті програми (опціонально)
-    // або чекаємо натискання кнопки старт.
-    // Для надійності запустимо мережеву частину відразу в окремому потоці:
+    // === НАЛАШТУВАННЯ ІНТЕРФЕЙСУ (READ ONLY) ===
+    // Забороняємо змінювати інформаційні поля вручну
+    ui->currentLot->setReadOnly(true);
+    ui->currentBet->setReadOnly(true);
+    ui->clientName->setReadOnly(true);
+    ui->timer->setReadOnly(true);
+    ui->logTextEdit->setReadOnly(true);
+
+    // Вирівнювання тексту для краси
+    ui->timer->setAlignment(Qt::AlignCenter);
+    ui->currentBet->setAlignment(Qt::AlignCenter);
+    ui->clientName->setAlignment(Qt::AlignCenter);
+
+    // Запускаємо сервер
     std::thread(&Server::startServerThread, this).detach();
 }
 
@@ -51,17 +62,13 @@ Server::~Server()
 // === УПРАВЛІННЯ СПИСКОМ КЛІЄНТІВ (GUI) ===
 
 void Server::onAddClient(int id, QString name) {
-    // Формат рядка: "Name (ID: 1)"
     QString itemText = name + " (ID: " + QString::number(id) + ")";
     QListWidgetItem *item = new QListWidgetItem(itemText);
-
-    // Зберігаємо ID клієнта в item, щоб потім знайти кого видаляти
     item->setData(Qt::UserRole, id);
     ui->clientsListWidget->addItem(item);
 }
 
 void Server::onRemoveClient(int id) {
-    // Шукаємо в списку елемент з таким ID
     for (int i = 0; i < ui->clientsListWidget->count(); ++i) {
         QListWidgetItem *item = ui->clientsListWidget->item(i);
         if (item->data(Qt::UserRole).toInt() == id) {
@@ -245,45 +252,33 @@ void Server::clientHandler(SOCKET client_socket, int client_id) {
     char nameBuffer[1024];
     ZeroMemory(nameBuffer, 1024);
 
-    // 1. Очікуємо ім'я
     int nameBytes = recv(client_socket, nameBuffer, 1024, 0);
     QString username = "Unknown";
 
     if (nameBytes > 0) {
         username = QString::fromUtf8(nameBuffer, nameBytes);
-
         {
             std::lock_guard<std::mutex> lock(clients_mutex);
             client_names[client_id] = username;
         }
-
         emit logToGui("Підключився: " + username);
-        // Додаємо в список на екрані
         emit addClientToGui(client_id, username);
     } else {
         closesocket(client_socket);
         return;
     }
 
-    // 2. Цикл ставок
     int bid_amount;
     while (isRunning) {
         int bytes_read = recv(client_socket, (char*)&bid_amount, sizeof(bid_amount), 0);
 
         if (bytes_read <= 0) {
             emit logToGui(username + " відключився.");
-
-            // Видаляємо зі списку на екрані
             emit removeClientFromGui(client_id);
-
-            // Видаляємо з карти імен
             {
                 std::lock_guard<std::mutex> lock(clients_mutex);
                 client_names.erase(client_id);
-                // Примітка: з вектора сокетів тут видалити важче без блокування,
-                // в реальному проекті треба було б почистити connected_clients
             }
-
             closesocket(client_socket);
             return;
         }
@@ -299,8 +294,6 @@ void Server::clientHandler(SOCKET client_socket, int client_id) {
 
 void Server::broadcastMessage(const std::string &msg) {
     std::lock_guard<std::mutex> lock(clients_mutex);
-    // Проходимо по сокетах. Оскільки ми не видаляємо їх з вектора при відключенні (для простоти),
-    // деякі send можуть повернути помилку - це ок.
     for (SOCKET sock : connected_clients) {
         send(sock, msg.c_str(), msg.length(), 0);
     }
@@ -319,6 +312,15 @@ void Server::auctionLogicLoop() {
         if (msg.amount > max_bid) {
             max_bid = msg.amount;
             winner_id = msg.client_id;
+
+            // === ПОВЕРТАЄМО ТАЙМЕР НА 60 СЕК ПРИ НОВІЙ СТАВЦІ ===
+            if (remainingTime > 0) {
+                remainingTime = 60;
+                emit updateTimerGui("60");
+                broadcastMessage("TIMER:60");
+                emit logToGui("Час продовжено до 60с через нову ставку.");
+            }
+            // ====================================================
 
             emit updateHighestBid(winner_id, max_bid);
 
